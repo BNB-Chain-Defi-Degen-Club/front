@@ -1,0 +1,21 @@
+{
+  "short_name": "BDDC",
+  "name": "BDDC",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "48x48 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "logo192.png",
+      "type": "image/png",
+      "sizes": "90x90",
+      "purpose": "any"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#0f172a"
+}

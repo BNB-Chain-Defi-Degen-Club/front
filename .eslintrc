@@ -1,0 +1,46 @@
+{
+  "env": {
+    "browser": true,
+    "node": true,
+    "es6": true
+  },
+  "globals": {
+    "ethereum": "readonly"
+  },
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "project": "tsconfig.json"
+  },
+  "plugins": ["react", "prettier", "@typescript-eslint"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended", 
+    "plugin:react-hooks/recommended",
+    "plugin:@typescript-eslint/recommended", 
+    "eslint-config-prettier", 
+    "plugin:prettier/recommended"
+    
+  ],
+  "ignorePatterns": ["build/**", "node_modules/**"],
+  "rules": {
+    "no-undef": "off",
+    "no-unused-vars": "off",
+    "prefer-const" : "warn",
+    "@typescript-eslint/no-unused-vars": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+
+    "prettier/prettier": [
+      "warn",
+      {
+        "endOfLine": "auto"
+      }
+    ],
+    "react/jsx-uses-react": "off",
+    "react/react-in-jsx-scope": "off"
+  },
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  }
+}
