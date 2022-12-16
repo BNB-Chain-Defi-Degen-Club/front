@@ -2,7 +2,6 @@
 ### BNB Chain DeFi Degen Club
 
 BDDC is a community for DeFi Degens on BNB Chain.
-We used 'Worlde Game' Source cloned from 
 
 ### To Run Locally
 
