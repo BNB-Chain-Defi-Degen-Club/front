@@ -27,16 +27,24 @@ const Dashboard = () => {
   const { account } = useWeb3React();
   const cakeContract = useContract(CAKE_CONTRACT_ADDRESS, ABI_CAKE);
 
-  const handleChangeFromAmount = () => {
-    (e: ChangeEvent<HTMLInputElement>) => {
-      if (e.target.value.match(/^[0-9]*[.,]?[0-9]*$/)) setFromAmount(e.currentTarget.value);
-    };
+  const handleChangeFromAmount = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.value.match(/^[0-9]*[.,]?[0-9]*$/)) setFromAmount(e.currentTarget.value);
   };
 
   const handleClickMax = () => {
     if (fromToken === 'CAKE') {
       setFromAmount(myCakeAmount);
     } else setFromAmount('0');
+  };
+
+  const handleClickAdd = (token: string) => {
+    if (token === 'CAKE') {
+      setFromToken('CAKE');
+    } else {
+      setFromToken('WOM');
+    }
+    setFromAmount('');
+    setOpenAddTokenModal(true);
   };
 
   useEffect(() => {
@@ -152,10 +160,7 @@ const Dashboard = () => {
                   <img src={CAKE} width={20} height={20} className="mr-1" />
                   PancakeSwap
                   <button
-                    onClick={() => {
-                      setFromAmount('');
-                      setOpenAddTokenModal(true);
-                    }}
+                    onClick={() => handleClickAdd('CAKE')}
                     type="button"
                     className="focus:outline-none text-black bg-yellow-400 hover:bg-yellow-500 font-bold rounded-lg text-sm px-2 py-1 ml-4"
                   >
@@ -171,10 +176,7 @@ const Dashboard = () => {
                   <img src={WOM} width={20} height={20} className="mr-1" />
                   Wombat Exchange
                   <button
-                    onClick={() => {
-                      setFromAmount('');
-                      setOpenAddTokenModal(true);
-                    }}
+                    onClick={() => handleClickAdd('WOM')}
                     type="button"
                     className="focus:outline-none text-black bg-yellow-400 hover:bg-yellow-500 font-bold rounded-lg text-sm px-2 py-1 ml-4"
                   >
@@ -195,9 +197,9 @@ const Dashboard = () => {
           id="popup-modal"
           tabIndex={-1}
           aria-modal="true"
-          className="bg-black/50 fixed top-0 left-0 right-0 z-50  p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-modal md:h-full flex justify-center items-center"
+          className="bg-black/50 fixed top-0 left-0 right-0 z-50  p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-modal h-full flex justify-center items-center"
         >
-          <div className="relative w-full h-full max-w-md md:h-auto">
+          <div className="relative w-full h-full max-w-xl h-auto">
             <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
               <button
                 type="button"
@@ -215,70 +217,72 @@ const Dashboard = () => {
               </button>
               <div className="px-6 py-12 flex flex-col	justify-center">
                 <h1 className="text-white text-xl font-bold mb-4">Add Tokens</h1>
-                <button
-                  id="dropdownDefault"
-                  data-dropdown-toggle="dropdown"
-                  className="text-white bg-blue-700 font-medium text-sm px-4 py-2.5 text-center inline-flex items-center"
-                  type="button"
-                  onClick={() => {
-                    setOpenTokenDropdown(true);
-                  }}
-                >
-                  {fromToken}
-                  <svg
-                    className="ml-2 w-4 h-4"
-                    aria-hidden="true"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
-                  </svg>
-                </button>
-                <h1 className="text-white my-2">Balance : {fromToken === 'CAKE' ? myCakeAmount : '0'}</h1>
-                {openTokenDropdown && (
-                  <div
-                    id="dropdown"
-                    className="z-10 divide-y divide-gray-100 shadow bg-gray-700"
-                    style={{
-                      position: 'absolute',
-                      top: 132,
-                      left: '1.5rem',
-                      width: 'calc(100% - 3rem)',
-                    }}
-                  >
-                    <ul className="text-sm text-gray-200 bg-blue-800 " aria-labelledby="dropdownDefault">
-                      <li className="p-2">
-                        <button
-                          className="w-full text-left"
-                          onClick={() => {
-                            setFromToken('CAKE');
-                            setOpenTokenDropdown(false);
-                          }}
-                        >
-                          CAKE
-                        </button>
-                      </li>
-                      <li className="p-2">
-                        <button
-                          className="w-full text-left"
-                          onClick={() => {
-                            setFromToken('WOM');
-                            setOpenTokenDropdown(false);
-                          }}
-                        >
-                          WOM
-                        </button>
-                      </li>
-                    </ul>
-                  </div>
-                )}
                 <div>
-                  <label htmlFor="from" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                    From {fromToken}
+                  <label htmlFor="from" className="mb-2 text-sm font-medium text-white flex justify-between">
+                    <span>From {fromToken} </span>
+                    <span>Balance : {fromToken === 'CAKE' ? myCakeAmount : '0'}</span>
                   </label>
                   <div className="flex">
+                    <div className="mr-2 relative">
+                      <button
+                        id="dropdownDefault"
+                        data-dropdown-toggle="dropdown"
+                        className="text-white bg-blue-700 font-medium text-sm px-4 py-2.5 text-center inline-flex items-center"
+                        type="button"
+                        onClick={() => {
+                          setOpenTokenDropdown(true);
+                        }}
+                      >
+                        {fromToken}
+                        <svg
+                          className="ml-2 w-4 h-4"
+                          aria-hidden="true"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                      </button>
+                      {openTokenDropdown && (
+                        <div
+                          id="dropdown"
+                          className="z-10 divide-y divide-gray-100 shadow bg-gray-700"
+                          style={{
+                            position: 'absolute',
+                            top: 40,
+                            left: 0,
+                            width: '100%',
+                          }}
+                        >
+                          <ul className="text-sm text-gray-200 bg-blue-800 " aria-labelledby="dropdownDefault">
+                            <li className="p-2">
+                              <button
+                                className="w-full text-left"
+                                onClick={() => {
+                                  setFromToken('CAKE');
+                                  setOpenTokenDropdown(false);
+                                }}
+                              >
+                                CAKE
+                              </button>
+                            </li>
+                            <li className="p-2">
+                              <button
+                                className="w-full text-left"
+                                onClick={() => {
+                                  setFromToken('WOM');
+                                  setOpenTokenDropdown(false);
+                                }}
+                              >
+                                WOM
+                              </button>
+                            </li>
+                          </ul>
+                        </div>
+                      )}
+                    </div>
                     <input
                       type="text"
                       id="from"
@@ -307,7 +311,7 @@ const Dashboard = () => {
                 <button
                   data-modal-toggle="popup-modal"
                   type="button"
-                  className="text-white bg-yellow-600 rounded-lg font-bold text-lg px-4 py-2.5 text-center "
+                  className="text-white bg-yellow-400 rounded-lg font-bold text-lg px-4 py-2.5 text-center mt-4"
                 >
                   Lock Tokens
                 </button>
