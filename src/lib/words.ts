@@ -74,7 +74,6 @@ export const localeAwareLowerCase = (text: string) => {
 };
 
 export const localeAwareUpperCase = (text: string) => {
-  console.log(text);
   return process.env.REACT_APP_LOCALE_STRING
     ? text.toLocaleUpperCase(process.env.REACT_APP_LOCALE_STRING)
     : text.toUpperCase();
