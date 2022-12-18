@@ -4,13 +4,6 @@
 BDDC is a community for DeFi Degens on BNB Chain.
 
 ### To Run Locally
-
-1. Create a new file called **wordlist.ts** in **src/constants**.
-2. Create the WORDS array in **src/constants/wordlist.ts**.
-```ts
-export const WORDS = ['words'];
-```
-3. Perform the following command line actions.
 ```bash
 $> npm install
 $> npm run start
