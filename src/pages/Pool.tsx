@@ -8,7 +8,6 @@ import USDC from '../assets/Ellipse28.png';
 import { DLP_CONTRACT_ADDRESS } from '../constants/settings';
 import { useAlert } from '../context/AlertContext';
 import { getContract, useContract } from '../hooks/useContract';
-import useMetamaskAuth from '../hooks/useMetamaskAuth';
 import useWeb3Provider from '../hooks/useWeb3Provider';
 import { useWeb3React } from '@web3-react/core';
 import BigNumber from 'bignumber.js';
@@ -20,7 +19,6 @@ const Pool = () => {
   const dlpContract = getContract(ABI_DLP, DLP_CONTRACT_ADDRESS);
   const dlpInterface = new ethers.utils.Interface(ABI_DLP);
   const { showError: showErrorAlert, showSuccess: showSuccessAlert } = useAlert();
-  const { login: connectWallet } = useMetamaskAuth();
 
   const [openTokenDropdown, setOpenTokenDropdown] = useState(false);
   const [fromToken, setFromToken] = useState('BNB');
@@ -29,21 +27,11 @@ const Pool = () => {
   const [toToken, setToToken] = useState('BNB');
   const [toAmount, setToAmount] = useState('');
   const [tradeState, setTradeState] = useState('buy');
+  const [apr, setApr] = useState('');
+  const [stakingBalance, setStakingBalance] = useState('');
 
   const { library } = useWeb3Provider();
   const { account } = useWeb3React();
-
-  const APR_CONSTANT = (365.2422 * 24 * 60 * 60) / 3; // 1year / BNB block 생성주기
-  const getAPR = async () => {
-    const totalSupply = dlpContract.totalSupply();
-    return new BigNumber(totalSupply).gt(0)
-      ? new BigNumber(APR_CONSTANT)
-          .times(new BigNumber(10000)) //supplyPerBlock 임시값
-          .div(new BigNumber(totalSupply))
-          .times(new BigNumber(100))
-          .toFixed(2)
-      : '0.00';
-  };
 
   const handleInitInput = () => {
     setFromAmount('');
@@ -113,6 +101,7 @@ const Pool = () => {
       console.error(error);
     }
   };
+
   const handleClickSell = async () => {
     try {
       if (!account) {
@@ -169,7 +158,27 @@ const Pool = () => {
       }
     };
 
+    const renderStakingInfo = async () => {
+      if (library && dlpContract) {
+        const APR_CONSTANT = (365.2422 * 24 * 60 * 60) / 3; // 1year / BNB block 생성주기
+        const totalSupply = await dlpContract.totalSupply();
+
+        const result = BigNumber(formatUnits(totalSupply)).gt(0)
+          ? BigNumber(APR_CONSTANT)
+              .times(BigNumber(100)) //🚧 supplyPerBlock 임시값
+              .div(BigNumber(formatUnits(totalSupply)))
+              .times(BigNumber(100))
+              .toFixed(2)
+          : '0.00';
+        setApr(result);
+
+        const staked = await dlpContract.getStakingBalance();
+        setStakingBalance(BigNumber(formatUnits(staked)).toFormat(5));
+      }
+    };
+
     renderFromTokenBalance();
+    renderStakingInfo();
   }, [fromToken, library, account, dlpContract]);
 
   return (
@@ -400,9 +409,8 @@ const Pool = () => {
                 </div>
 
                 <button
-                  data-modal-toggle="popup-modal"
                   type="button"
-                  className="text-white bg-yellow-400 rounded-lg font-bold text-lg px-4 py-2.5 text-center mt-4 w-full"
+                  className="text-black bg-yellow-400 rounded-lg font-bold text-lg px-4 py-2.5 text-center mt-4 w-full"
                   onClick={handleClickBuy}
                 >
                   Buy DLP
@@ -522,15 +530,39 @@ const Pool = () => {
                 </div>
 
                 <button
-                  data-modal-toggle="popup-modal"
                   type="button"
-                  className="text-white bg-yellow-400 rounded-lg font-bold text-lg px-4 py-2.5 text-center mt-4 w-full"
+                  className="text-black bg-yellow-400 rounded-lg font-bold text-lg px-4 py-2.5 text-center mt-4 w-full"
                   onClick={handleClickSell}
                 >
                   Sell DLP
                 </button>
               </div>
             )}
+          </div>
+          <div className="px-6 py-3 flex flex-col	justify-center">
+            <h1 className="text-white text-xl font-bold mb-4">Stake DLP</h1>
+            <div className="flex">
+              <div className="text-white flex-1 text-center">
+                <h2>Price</h2>
+                <h3>$0.082</h3>
+              </div>
+              <div className="text-white flex-1 text-center">
+                <h2>APR</h2>
+                <h3>{apr}</h3>
+              </div>
+              <div className="text-white flex-1 text-center">
+                <h2>Staked</h2>
+                <h3>{stakingBalance}</h3>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              className="text-black bg-yellow-400 rounded-lg font-bold text-lg px-4 py-2.5 text-center mt-4 w-full"
+              onClick={handleClickSell}
+            >
+              Stake DLP
+            </button>
           </div>
         </div>
       </div>
