@@ -54,6 +54,11 @@ export const Navbar = ({
               </Link>
             </li>
             <li className="mx-2">
+              <Link to="/earn" className={location.pathname === '/earn' ? 'text-yellow-500' : 'text-white'}>
+                Earn
+              </Link>
+            </li>
+            <li className="mx-2">
               <Link to="/roadmap" className={location.pathname === '/roadmap' ? 'text-yellow-500' : 'text-white'}>
                 Roadmap
               </Link>

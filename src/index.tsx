@@ -4,6 +4,7 @@ import { AlertProvider } from './context/AlertContext';
 import './index.css';
 import { getLibrary } from './lib/web3React';
 import Dashboard from './pages/Dashboard';
+import Earn from './pages/Earn';
 import Lending from './pages/Lending';
 import NFT from './pages/Nft';
 import Pool from './pages/Pool';
@@ -22,6 +23,7 @@ const router = createBrowserRouter([
       { path: '/roadmap', element: <Roadmap /> },
       { path: '/pool', element: <Pool /> },
       { path: '/lending', element: <Lending /> },
+      { path: '/earn', element: <Earn /> },
     ],
   },
 ]);
