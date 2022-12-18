@@ -233,7 +233,6 @@ const Pool = () => {
   };
 
   const renderFromTokenBalance = useCallback(async () => {
-    console.log('renderFromTokenBalance');
     if (library && account && udlpContract) {
       if (fromToken === 'BNB') {
         const balance = await library.getBalance(account);
@@ -247,7 +246,6 @@ const Pool = () => {
   }, [fromToken, library, account, udlpContract]);
 
   const renderStakingInfo = useCallback(async () => {
-    console.log('renderStakingInfo');
     if (library && dlpContract) {
       const APR_CONSTANT = (365.2422 * 24 * 60 * 60) / 3; // 1year / BNB block 생성주기
       const totalSupply = await dlpContract.totalSupply();
