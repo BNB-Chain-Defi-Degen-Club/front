@@ -1,6 +1,5 @@
 import './App.css';
 import prizeImg from './assets/money-bag.png';
-import { AlertContainer } from './components/alerts/AlertContainer';
 import { Grid } from './components/grid/Grid';
 import { Keyboard } from './components/keyboard/Keyboard';
 import { DatePickerModal } from './components/modals/DatePickerModal';
@@ -477,7 +476,6 @@ function App() {
                 handleClose={() => setIsNeedFeeModalOpen(false)}
                 handleSetPaid={handleSetPaid}
               />
-              <AlertContainer />
             </div>
           </>
         )}

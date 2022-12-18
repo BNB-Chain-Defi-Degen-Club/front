@@ -48,6 +48,11 @@ export const Navbar = ({
                 Roadmap
               </Link>
             </li>
+            <li className="mx-2">
+              <Link to="/pool" className={location.pathname === '/pool' ? 'text-yellow-500' : 'text-white'}>
+                Pool
+              </Link>
+            </li>
           </ul>
         </div>
 
