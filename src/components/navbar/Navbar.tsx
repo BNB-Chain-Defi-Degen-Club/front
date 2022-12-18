@@ -44,13 +44,18 @@ export const Navbar = ({
               </Link>
             </li>
             <li className="mx-2">
-              <Link to="/roadmap" className={location.pathname === '/roadmap' ? 'text-yellow-500' : 'text-white'}>
-                Roadmap
+              <Link to="/pool" className={location.pathname === '/pool' ? 'text-yellow-500' : 'text-white'}>
+                Pool
               </Link>
             </li>
             <li className="mx-2">
-              <Link to="/pool" className={location.pathname === '/pool' ? 'text-yellow-500' : 'text-white'}>
-                Pool
+              <Link to="/lending" className={location.pathname === '/lending' ? 'text-yellow-500' : 'text-white'}>
+                Lending
+              </Link>
+            </li>
+            <li className="mx-2">
+              <Link to="/roadmap" className={location.pathname === '/roadmap' ? 'text-yellow-500' : 'text-white'}>
+                Roadmap
               </Link>
             </li>
           </ul>

@@ -651,7 +651,7 @@ const Pool = () => {
               className="text-black bg-yellow-400 rounded-lg font-bold text-lg px-4 py-2.5 text-center mt-4 w-full"
               onClick={() => setOpenStakingModal(true)}
             >
-              Stake DLP
+              Confirm
             </button>
           </div>
         </div>
