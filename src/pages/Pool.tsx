@@ -16,7 +16,8 @@ import { formatUnits } from 'ethers/lib/utils';
 import { ChangeEvent, MutableRefObject, useEffect, useRef, useState } from 'react';
 
 const Pool = () => {
-  const dlpContract = getContract(ABI_DLP, DLP_CONTRACT_ADDRESS);
+  const dlpContract = getContract(ABI_DLP, DLP_CONTRACT_ADDRESS); //provider = ethers
+  const udlpContract = useContract(DLP_CONTRACT_ADDRESS, ABI_DLP); //provider = user
   const dlpInterface = new ethers.utils.Interface(ABI_DLP);
   const { showError: showErrorAlert, showSuccess: showSuccessAlert } = useAlert();
 
@@ -27,8 +28,11 @@ const Pool = () => {
   const [toToken, setToToken] = useState('BNB');
   const [toAmount, setToAmount] = useState('');
   const [tradeState, setTradeState] = useState('buy');
+  const [stakeState, setStakeState] = useState('stake');
   const [apr, setApr] = useState('');
   const [stakingBalance, setStakingBalance] = useState('');
+  const [openStakingModal, setOpenStakingModal] = useState(false);
+  const [stakingAmount, setStakingAmount] = useState('');
 
   const { library } = useWeb3Provider();
   const { account } = useWeb3React();
@@ -64,7 +68,7 @@ const Pool = () => {
         showErrorAlert('Connect Wallet');
         return;
       }
-      if (account && library && dlpContract) {
+      if (account && library && udlpContract) {
         const parsedAmount = ethers.utils.parseUnits(fromAmount);
         const amountToHexValue = ethers.utils.hexValue(parsedAmount);
 
@@ -108,9 +112,8 @@ const Pool = () => {
         showErrorAlert('Connect Wallet');
         return;
       }
-      if (account && library && dlpContract) {
+      if (account && library && udlpContract) {
         const parsedAmount = ethers.utils.parseUnits(fromAmount);
-        const amountToHexValue = ethers.utils.hexValue(parsedAmount);
 
         // //트랜잭션에 사용할 data를 위해 인코딩
         const data = dlpInterface.encodeFunctionData('sellDLP', [parsedAmount]);
@@ -144,15 +147,100 @@ const Pool = () => {
     }
   };
 
+  const handleChangeStakingAmount = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.value.match(/^[0-9]*[.,]?[0-9]*$/)) setStakingAmount(e.currentTarget.value);
+  };
+
+  const handleClickMaxDLP = async () => {
+    if (udlpContract) {
+      const balance = await udlpContract.balanceOf(account);
+      setStakingAmount(formatUnits(balance));
+    }
+  };
+
+  const handleClickConfirmStaking = async () => {
+    try {
+      if (!account) {
+        showErrorAlert('Connect Wallet');
+        return;
+      }
+
+      if (account && library && udlpContract) {
+        if (stakeState === 'stake') {
+          const parsedAmount = ethers.utils.parseUnits(stakingAmount);
+
+          // //트랜잭션에 사용할 data를 위해 인코딩
+          const data = dlpInterface.encodeFunctionData('stake', [parsedAmount]);
+
+          const gasLimit = await library.estimateGas({
+            from: account,
+            to: DLP_CONTRACT_ADDRESS,
+            data,
+          });
+          const gasLimitToHexValue = ethers.utils.hexValue(gasLimit.add(100000));
+
+          const txHash = await window.ethereum.request({
+            method: 'eth_sendTransaction',
+            params: [
+              {
+                from: account,
+                to: DLP_CONTRACT_ADDRESS,
+                gas: gasLimitToHexValue,
+                data,
+              },
+            ],
+          });
+          if (String(txHash)) {
+            showSuccessAlert('Staked successfully');
+            setStakingAmount('');
+            setOpenStakingModal(false);
+          }
+        } else {
+          const parsedAmount = ethers.utils.parseUnits(stakingAmount);
+
+          // //트랜잭션에 사용할 data를 위해 인코딩
+          const data = dlpInterface.encodeFunctionData('unstake', [parsedAmount]);
+
+          const gasLimit = await library.estimateGas({
+            from: account,
+            to: DLP_CONTRACT_ADDRESS,
+            data,
+          });
+          const gasLimitToHexValue = ethers.utils.hexValue(gasLimit.add(100000));
+
+          const txHash = await window.ethereum.request({
+            method: 'eth_sendTransaction',
+            params: [
+              {
+                from: account,
+                to: DLP_CONTRACT_ADDRESS,
+                gas: gasLimitToHexValue,
+                data,
+              },
+            ],
+          });
+          if (String(txHash)) {
+            showSuccessAlert('Unstaked successfully');
+            setStakingAmount('');
+            setOpenStakingModal(false);
+          }
+        }
+      }
+    } catch (error) {
+      showErrorAlert('Failed');
+      console.error(error);
+    }
+  };
+
   useEffect(() => {
     const renderFromTokenBalance = async () => {
-      if (library && account && dlpContract) {
+      if (library && account && udlpContract) {
         if (fromToken === 'BNB') {
           const balance = await library.getBalance(account);
           setFromBalance(formatUnits(balance));
         } else if (fromToken === 'DLP') {
-          // const balance = await dlpContract.myBalance();
-          const balance = await dlpContract.balanceOf(account);
+          const balance = await udlpContract.myBalance();
+          // const balance = await dlpContract.balanceOf(account);
           setFromBalance(formatUnits(balance));
         } else setFromBalance('0');
       }
@@ -172,14 +260,16 @@ const Pool = () => {
           : '0.00';
         setApr(result);
 
-        const staked = await dlpContract.getStakingBalance();
-        setStakingBalance(BigNumber(formatUnits(staked)).toFormat(5));
+        if (udlpContract) {
+          const staked = await udlpContract.getStakingBalance(account);
+          setStakingBalance(BigNumber(formatUnits(staked)).toFormat(5));
+        }
       }
     };
 
     renderFromTokenBalance();
     renderStakingInfo();
-  }, [fromToken, library, account, dlpContract]);
+  }, [fromToken, library, account, dlpContract, udlpContract]);
 
   return (
     <div className="px-5">
@@ -559,13 +649,87 @@ const Pool = () => {
             <button
               type="button"
               className="text-black bg-yellow-400 rounded-lg font-bold text-lg px-4 py-2.5 text-center mt-4 w-full"
-              onClick={handleClickSell}
+              onClick={() => setOpenStakingModal(true)}
             >
               Stake DLP
             </button>
           </div>
         </div>
       </div>
+
+      {openStakingModal && (
+        <div
+          id="popup-modal"
+          tabIndex={-1}
+          aria-modal="true"
+          className="bg-black/50 fixed top-0 left-0 right-0 z-50  p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-modal h-full flex justify-center items-center"
+        >
+          <div className="relative w-full h-full max-w-xl h-auto">
+            <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
+              <button
+                type="button"
+                className="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-800 dark:hover:text-white"
+                data-modal-toggle="popup-modal"
+                onClick={() => setOpenStakingModal(false)}
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    fillRule="evenodd"
+                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                    clipRule="evenodd"
+                  ></path>
+                </svg>
+              </button>
+              <div className="px-6 py-12 flex flex-col	justify-center">
+                <div className="flex mb-2">
+                  <button
+                    onClick={() => {
+                      setStakeState('stake');
+                    }}
+                    className={
+                      'text-white font-bold flex-1 rounded-tr-none rounded-br-none rounded-sm p-2  ' +
+                      (stakeState === 'stake' ? 'bg-yellow-500' : 'bg-gray-600')
+                    }
+                  >
+                    Stake
+                  </button>
+                  <button
+                    onClick={() => {
+                      setStakeState('unstake');
+                    }}
+                    className={
+                      'text-white font-bold flex-1  rounded-tl-none rounded-bl-none rounded-sm p-2   ' +
+                      (stakeState === 'unstake' ? 'bg-yellow-500' : 'bg-gray-600')
+                    }
+                  >
+                    Unstake
+                  </button>
+                </div>
+                <div className="flex">
+                  <input
+                    type="text"
+                    id="from"
+                    className="border border-gray-300 text-sm rounded-lg block w-full p-2.5 bg-gray-700 text-white "
+                    required
+                    value={stakingAmount}
+                    onChange={handleChangeStakingAmount}
+                  />
+                  <button className="bg-white text-black p-2 ml-2 rounded-lg" onClick={handleClickMaxDLP}>
+                    Max
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  className="text-white bg-yellow-400 rounded-lg font-bold text-lg px-4 py-2.5 text-center mt-4"
+                  onClick={handleClickConfirmStaking}
+                >
+                  Confirm
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
