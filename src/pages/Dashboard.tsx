@@ -12,14 +12,32 @@ import useWeb3Provider from '../hooks/useWeb3Provider';
 import { useWeb3React } from '@web3-react/core';
 import BigNumber from 'bignumber.js';
 import { formatUnits } from 'ethers/lib/utils';
-import { useEffect, useState } from 'react';
+import { ChangeEvent, MutableRefObject, useEffect, useRef, useState } from 'react';
 
 const Dashboard = () => {
   const [bnbTotalAmount, setBnbTotalAmount] = useState('0');
   const [myCakeAmount, setMyCakeAmount] = useState('0');
+  const [openAddTokenModal, setOpenAddTokenModal] = useState(false);
+  const [openTokenDropdown, setOpenTokenDropdown] = useState(false);
+  const [fromToken, setFromToken] = useState('WOM');
+  const [fromAmount, setFromAmount] = useState('');
+  const [toToken, setToToken] = useState('ddcWOM');
+
   const { library } = useWeb3Provider();
   const { account } = useWeb3React();
   const cakeContract = useContract(CAKE_CONTRACT_ADDRESS, ABI_CAKE);
+
+  const handleChangeFromAmount = () => {
+    (e: ChangeEvent<HTMLInputElement>) => {
+      if (e.target.value.match(/^[0-9]*[.,]?[0-9]*$/)) setFromAmount(e.currentTarget.value);
+    };
+  };
+
+  const handleClickMax = () => {
+    if (fromToken === 'CAKE') {
+      setFromAmount(myCakeAmount);
+    } else setFromAmount('0');
+  };
 
   useEffect(() => {
     const renderTotalPrizes = async () => {
@@ -39,6 +57,20 @@ const Dashboard = () => {
     renderTotalPrizes();
     renderMyCakeAmount();
   }, [library, cakeContract, account]);
+
+  useEffect(() => {
+    switch (fromToken) {
+      case 'WOM':
+        setToToken('ddcWOM');
+        break;
+      case 'CAKE':
+        setToToken('ddcCAKE');
+        break;
+
+      default:
+        break;
+    }
+  }, [fromToken]);
   return (
     <div className="px-5">
       <div className="flex flex-wrap gap-4 justify-center">
@@ -78,13 +110,13 @@ const Dashboard = () => {
                       <Loading /> &nbsp;BNB
                       <button
                         type="button"
-                        className="focus:outline-none text-black bg-yellow-400 hover:bg-yellow-500 font-medium rounded-lg text-sm px-2 py-2 ml-4"
+                        className="focus:outline-none text-black bg-yellow-400 hover:bg-yellow-500 font-bold rounded-lg text-sm px-2 py-1 ml-4"
                       >
                         Claim
                       </button>
                     </>
                   ) : (
-                    'Connect Wallet'
+                    '0'
                   )}
                 </td>
               </tr>
@@ -116,27 +148,174 @@ const Dashboard = () => {
             </thead>
             <tbody>
               <tr className="bg-white dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-                <th scope="row" className="py-4 px-6 font-medium  whitespace-nowrap text-white flex w-80">
-                  <img src={CAKE} width={20} className="mr-1" />
+                <th scope="row" className="py-4 px-6 font-medium  whitespace-nowrap text-white flex items-center w-80">
+                  <img src={CAKE} width={20} height={20} className="mr-1" />
                   PancakeSwap
+                  <button
+                    onClick={() => {
+                      setFromAmount('');
+                      setOpenAddTokenModal(true);
+                    }}
+                    type="button"
+                    className="focus:outline-none text-black bg-yellow-400 hover:bg-yellow-500 font-bold rounded-lg text-sm px-2 py-1 ml-4"
+                  >
+                    Add
+                  </button>
                 </th>
                 <td className="py-4 px-6 text-white">0 CAKE</td>
                 <td className="py-4 px-6 text-white">{myCakeAmount} CAKE</td>
-                <td className="py-4 px-6 text-white">0 CAKE</td>
+                <td className="py-4 px-6 text-white">0 ddcCAKE</td>
               </tr>
               <tr className="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-600">
-                <th scope="row" className="py-4 px-6 font-medium  whitespace-nowrap text-white flex w-80">
-                  <img src={WOM} width={20} className="mr-1" />
+                <th scope="row" className="py-4 px-6 font-medium  whitespace-nowrap text-white flex items-center w-80">
+                  <img src={WOM} width={20} height={20} className="mr-1" />
                   Wombat Exchange
+                  <button
+                    onClick={() => {
+                      setFromAmount('');
+                      setOpenAddTokenModal(true);
+                    }}
+                    type="button"
+                    className="focus:outline-none text-black bg-yellow-400 hover:bg-yellow-500 font-bold rounded-lg text-sm px-2 py-1 ml-4"
+                  >
+                    Add
+                  </button>
                 </th>
                 <td className="py-4 px-6 text-white">0 WOM</td>
                 <td className="py-4 px-6 text-white">0 WOM</td>
-                <td className="py-4 px-6 text-white">0 WOM</td>
+                <td className="py-4 px-6 text-white">0 ddcWOM</td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
+
+      {openAddTokenModal && (
+        <div
+          id="popup-modal"
+          tabIndex={-1}
+          aria-modal="true"
+          className="bg-black/50 fixed top-0 left-0 right-0 z-50  p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-modal md:h-full flex justify-center items-center"
+        >
+          <div className="relative w-full h-full max-w-md md:h-auto">
+            <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
+              <button
+                type="button"
+                className="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-800 dark:hover:text-white"
+                data-modal-toggle="popup-modal"
+                onClick={() => setOpenAddTokenModal(false)}
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    fillRule="evenodd"
+                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                    clipRule="evenodd"
+                  ></path>
+                </svg>
+              </button>
+              <div className="px-6 py-12 flex flex-col	justify-center">
+                <h1 className="text-white text-xl font-bold mb-4">Add Tokens</h1>
+                <button
+                  id="dropdownDefault"
+                  data-dropdown-toggle="dropdown"
+                  className="text-white bg-blue-700 font-medium text-sm px-4 py-2.5 text-center inline-flex items-center"
+                  type="button"
+                  onClick={() => {
+                    setOpenTokenDropdown(true);
+                  }}
+                >
+                  {fromToken}
+                  <svg
+                    className="ml-2 w-4 h-4"
+                    aria-hidden="true"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </button>
+                <h1 className="text-white my-2">Balance : {fromToken === 'CAKE' ? myCakeAmount : '0'}</h1>
+                {openTokenDropdown && (
+                  <div
+                    id="dropdown"
+                    className="z-10 divide-y divide-gray-100 shadow bg-gray-700"
+                    style={{
+                      position: 'absolute',
+                      top: 132,
+                      left: '1.5rem',
+                      width: 'calc(100% - 3rem)',
+                    }}
+                  >
+                    <ul className="text-sm text-gray-200 bg-blue-800 " aria-labelledby="dropdownDefault">
+                      <li className="p-2">
+                        <button
+                          className="w-full text-left"
+                          onClick={() => {
+                            setFromToken('CAKE');
+                            setOpenTokenDropdown(false);
+                          }}
+                        >
+                          CAKE
+                        </button>
+                      </li>
+                      <li className="p-2">
+                        <button
+                          className="w-full text-left"
+                          onClick={() => {
+                            setFromToken('WOM');
+                            setOpenTokenDropdown(false);
+                          }}
+                        >
+                          WOM
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
+                )}
+                <div>
+                  <label htmlFor="from" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                    From {fromToken}
+                  </label>
+                  <div className="flex">
+                    <input
+                      type="text"
+                      id="from"
+                      className="border border-gray-300 text-sm rounded-lg block w-full p-2.5 bg-gray-700 text-white "
+                      required
+                      value={fromAmount}
+                      onChange={handleChangeFromAmount}
+                    />
+                    <button className="bg-white text-black p-2 ml-2 rounded-lg" onClick={handleClickMax}>
+                      Max
+                    </button>
+                  </div>
+                </div>
+                <div className="my-2">
+                  <label htmlFor="to" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                    To {toToken}
+                  </label>
+                  <div
+                    id="to"
+                    className="h-10 border border-gray-300 text-sm rounded-lg block w-full p-2.5 bg-gray-700 text-white "
+                  >
+                    {fromAmount}
+                  </div>
+                </div>
+
+                <button
+                  data-modal-toggle="popup-modal"
+                  type="button"
+                  className="text-white bg-yellow-600 rounded-lg font-bold text-lg px-4 py-2.5 text-center "
+                >
+                  Lock Tokens
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

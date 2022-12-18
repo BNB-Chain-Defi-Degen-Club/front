@@ -291,3 +291,15 @@ svg.cursor-pointer:hover {
 .react-datepicker__day--range-end {
   @apply bg-indigo-600 text-white hover:bg-white hover:text-gray-700;
 }
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
