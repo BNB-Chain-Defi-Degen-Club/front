@@ -274,8 +274,8 @@ const Pool = () => {
   return (
     <div className="px-5">
       <div className="flex flex-wrap gap-4 justify-center">
-        <div className="overflow-x-auto relative shadow-md sm:rounded-lg mb-8 flex-auto">
-          <table className="w-full text-sm text-left">
+        <div className="overflow-x-auto relative shadow-md sm:rounded-lg h-full flex-grow">
+          <table className="w-full text-sm text-left h-full ">
             <caption className="bg-gray-800 px-6 py-3">
               <h1 className="text-white text-2xl font-extrabold text-left">DLP Pool</h1>
             </caption>
