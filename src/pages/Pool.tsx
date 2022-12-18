@@ -13,7 +13,7 @@ import { useWeb3React } from '@web3-react/core';
 import BigNumber from 'bignumber.js';
 import { ethers } from 'ethers';
 import { formatUnits } from 'ethers/lib/utils';
-import { ChangeEvent, MutableRefObject, useEffect, useRef, useState } from 'react';
+import { ChangeEvent, MutableRefObject, useCallback, useEffect, useRef, useState } from 'react';
 
 const Pool = () => {
   const dlpContract = getContract(ABI_DLP, DLP_CONTRACT_ADDRESS); //provider = ethers
@@ -232,44 +232,53 @@ const Pool = () => {
     }
   };
 
+  const renderFromTokenBalance = useCallback(async () => {
+    console.log('renderFromTokenBalance');
+    if (library && account && udlpContract) {
+      if (fromToken === 'BNB') {
+        const balance = await library.getBalance(account);
+        setFromBalance(formatUnits(balance));
+      } else if (fromToken === 'DLP') {
+        const balance = await udlpContract.myBalance();
+        // const balance = await dlpContract.balanceOf(account);
+        setFromBalance(formatUnits(balance));
+      } else setFromBalance('0');
+    }
+  }, [fromToken, library, account, udlpContract]);
+
+  const renderStakingInfo = useCallback(async () => {
+    console.log('renderStakingInfo');
+    if (library && dlpContract) {
+      const APR_CONSTANT = (365.2422 * 24 * 60 * 60) / 3; // 1year / BNB block 생성주기
+      const totalSupply = await dlpContract.totalSupply();
+
+      const result = BigNumber(formatUnits(totalSupply)).gt(0)
+        ? BigNumber(APR_CONSTANT)
+            .times(BigNumber(100)) //🚧 supplyPerBlock 임시값
+            .div(BigNumber(formatUnits(totalSupply)))
+            .times(BigNumber(100))
+            .toFixed(2)
+        : '0.00';
+      setApr(result);
+
+      if (udlpContract) {
+        const staked = await udlpContract.getStakingBalance(account);
+        setStakingBalance(BigNumber(formatUnits(staked)).toFormat(5));
+      }
+    }
+  }, [library, account, udlpContract, dlpContract]);
+
   useEffect(() => {
-    const renderFromTokenBalance = async () => {
-      if (library && account && udlpContract) {
-        if (fromToken === 'BNB') {
-          const balance = await library.getBalance(account);
-          setFromBalance(formatUnits(balance));
-        } else if (fromToken === 'DLP') {
-          const balance = await udlpContract.myBalance();
-          // const balance = await dlpContract.balanceOf(account);
-          setFromBalance(formatUnits(balance));
-        } else setFromBalance('0');
-      }
-    };
-
-    const renderStakingInfo = async () => {
-      if (library && dlpContract) {
-        const APR_CONSTANT = (365.2422 * 24 * 60 * 60) / 3; // 1year / BNB block 생성주기
-        const totalSupply = await dlpContract.totalSupply();
-
-        const result = BigNumber(formatUnits(totalSupply)).gt(0)
-          ? BigNumber(APR_CONSTANT)
-              .times(BigNumber(100)) //🚧 supplyPerBlock 임시값
-              .div(BigNumber(formatUnits(totalSupply)))
-              .times(BigNumber(100))
-              .toFixed(2)
-          : '0.00';
-        setApr(result);
-
-        if (udlpContract) {
-          const staked = await udlpContract.getStakingBalance(account);
-          setStakingBalance(BigNumber(formatUnits(staked)).toFormat(5));
-        }
-      }
-    };
-
     renderFromTokenBalance();
     renderStakingInfo();
-  }, [fromToken, library, account, dlpContract, udlpContract]);
+
+    const interval = setInterval(() => {
+      renderFromTokenBalance();
+      renderStakingInfo();
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [renderFromTokenBalance, renderStakingInfo]);
 
   return (
     <div className="px-5">
