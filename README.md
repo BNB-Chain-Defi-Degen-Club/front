@@ -2,6 +2,7 @@
 ### BNB Chain DeFi Degen Club
 
 BDDC is a community for DeFi Degens on BNB Chain.
+[🚀 Try Out BDDC services!](https://bnb-hack-bddc.netlify.app/)
 
 ### To Run Locally
 ```bash
