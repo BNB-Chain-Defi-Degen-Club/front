@@ -26,7 +26,7 @@ const Earn = () => {
                 <th scope="row" className="p-2 ">
                   APR
                 </th>
-                <td>18,78%</td>
+                <td>18.78%</td>
               </tr>
               <tr className="p-2 bg-white dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
                 <th scope="row" className="p-2 ">
@@ -57,19 +57,19 @@ const Earn = () => {
                 <th scope="row" className="p-2 ">
                   APR
                 </th>
-                <td>18,78%</td>
+                <td>6.78%</td>
               </tr>
               <tr className="p-2 bg-white dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
                 <th scope="row" className="p-2 ">
                   My Accounts
                 </th>
-                <td>789.2 DDC</td>
+                <td>200.9 DLP</td>
               </tr>
               <tr className="p-2 bg-white dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
                 <th scope="row" className="p-2 ">
                   Staked
                 </th>
-                <td>0.0 DDC</td>
+                <td>0.0 DLP</td>
               </tr>
               <tr className="p-2 bg-white dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
                 <th scope="row" className="p-2 ">
@@ -96,19 +96,19 @@ const Earn = () => {
                 <th scope="row" className="p-2 ">
                   Total Supply
                 </th>
-                <td>1000000 DDC</td>
+                <td>10,00,000 DDC</td>
               </tr>
               <tr className="p-2 bg-white dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
                 <th scope="row" className="p-2 ">
                   Circulation Supply
                 </th>
-                <td>8382 DDC</td>
+                <td>8,382 DDC</td>
               </tr>
               <tr className="p-2 bg-white dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
                 <th scope="row" className="p-2 ">
                   Total Staked
                 </th>
-                <td>6780 DDC</td>
+                <td>6,780 DDC</td>
               </tr>
               <tr className="p-2 bg-white dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
                 <th scope="row" className="p-2 ">
@@ -124,9 +124,9 @@ const Earn = () => {
             </caption>
             <tbody>
               <tr className="p-2 bg-white dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-                <td className="p-2">BNB</td>
+                <td className="p-2 font-bold">BNB</td>
                 <td className="p-2">4.23 BNB</td>
-                <td className="p-2">DDC</td>
+                <td className="p-2 font-bold">DDC</td>
                 <td className="p-2">213.2 DDC</td>
                 <td className="p-2">
                   <button className="p-2 bg-yellow-400 text-center font-bold">Claim All</button>
