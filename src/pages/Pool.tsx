@@ -8,6 +8,7 @@ import USDC from '../assets/Ellipse28.png';
 import { DLP_CONTRACT_ADDRESS } from '../constants/settings';
 import { useAlert } from '../context/AlertContext';
 import { getContract, useContract } from '../hooks/useContract';
+import useInterval from '../hooks/useInterval';
 import useWeb3Provider from '../hooks/useWeb3Provider';
 import { useWeb3React } from '@web3-react/core';
 import BigNumber from 'bignumber.js';
@@ -269,14 +270,15 @@ const Pool = () => {
   useEffect(() => {
     renderFromTokenBalance();
     renderStakingInfo();
-
-    const interval = setInterval(() => {
-      renderFromTokenBalance();
-      renderStakingInfo();
-    }, 5000);
-
-    return () => clearInterval(interval);
   }, [renderFromTokenBalance, renderStakingInfo]);
+
+  useInterval(
+    async () => {
+      await renderFromTokenBalance();
+      await renderStakingInfo();
+    },
+    location.pathname === '/pool' ? 5000 : null,
+  );
 
   return (
     <div className="px-5">
@@ -645,11 +647,11 @@ const Pool = () => {
               </div>
               <div className="text-white flex-1 text-center">
                 <h2>APR</h2>
-                <h3>{apr}</h3>
+                <h3>{apr}%</h3>
               </div>
               <div className="text-white flex-1 text-center">
                 <h2>Staked</h2>
-                <h3>{stakingBalance}</h3>
+                <h3>{stakingBalance} DLP</h3>
               </div>
             </div>
 
@@ -658,7 +660,7 @@ const Pool = () => {
               className="text-black bg-yellow-400 rounded-lg font-bold text-lg px-4 py-2.5 text-center mt-4 w-full"
               onClick={() => setOpenStakingModal(true)}
             >
-              Confirm
+              Stake
             </button>
           </div>
         </div>
